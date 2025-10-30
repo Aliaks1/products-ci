@@ -1,0 +1,14 @@
+# Node / deps / OS
+node_modules/
+npm-debug.log*
+.DS_Store
+
+# SQLite
+backend/data.sqlite
+
+# Coverage / test
+coverage/
+
+# Env
+.env
+
