@@ -1,0 +1,52 @@
+name: build_test_deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install & migrate backend
+        working-directory: backend
+        run: |
+          npm ci
+          npm run migrate
+          npm run seed
+
+      - name: Run unit & integration tests
+        working-directory: backend
+        run: npm test
+
+      - name: Build frontend (static)
+        run: echo "OK"
+
+  deploy_prod:
+    needs: build_and_test
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Render (optional hook)
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          else
+            echo "Skip deploy: no RENDER_DEPLOY_HOOK"
+          fi
+      - name: Smoke /health
+        run: |
+          if [ -n "${{ secrets.PROD_URL }}" ]; then
+            curl -fsSL "${{ secrets.PROD_URL }}/health"
+          else
+            echo "Skip smoke: no PROD_URL"
+          fi
+
+
