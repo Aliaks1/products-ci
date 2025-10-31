@@ -13,6 +13,9 @@ app.get('/health', (_, res) => res.json({ status: 'ok', service: 'products-backe
 
 app.use('/api/products', productRoutes);
 //app.use('/api/categories', categoryRoutes);
+app.get('/', (_, res) => {
+  res.send('✅ Backend Aliaksandra Bryshten działa poprawnie!');
+});
 
 app.use((req, res) => errorResponse(res, 404, 'Not Found'));
 
